@@ -104,6 +104,8 @@
   .stat>div{flex:1; text-align:center; background:#fbf7f0; border-radius:10px; padding:8px;}
   .stat b{display:block; font-size:18px; color:var(--primary-dark);}
   .stat span{font-size:11px; color:var(--muted);}
+  .stage-now{background:#f5ead9; border-radius:10px; padding:10px 12px; font-size:14px; color:var(--primary-dark);}
+  .tip{margin-top:6px; font-size:13px; color:var(--text); line-height:1.6;}
 </style>
 </head>
 <body>
@@ -118,26 +120,26 @@
   <!-- ============ 页面1：毕业进度 ============ -->
   <section class="page active" id="page-progress">
     <div class="card">
-      <h3>🧑‍🎓 我的身份 <span class="tag">AI 会记住这些，给你更准的建议</span></h3>
+      <h3>🧑‍🎓 我的身份 <span class="tag">只填 3 个，其他自动算</span></h3>
       <div class="row">
         <div><label>专业/方向</label><input id="p-major" placeholder="如：生态学"></div>
-        <div><label>学校</label><input id="p-school" placeholder="如：北京林业大学"></div>
+        <div><label>入学年月</label><input type="month" id="p-start"></div>
       </div>
       <div class="row">
-        <div><label>当前年级</label>
-          <select id="p-grade"><option value="">请选择</option><option>研一</option><option>研二</option><option>研三</option></select>
-        </div>
         <div><label>学制</label>
           <select id="p-duration"><option value="3">学硕 3 年</option><option value="2">专硕 2 年</option><option value="2.5">专硕 2.5 年</option></select>
         </div>
+        <div><label>毕业目标</label><input id="p-goal" placeholder="如：1 篇 SCI 二区"></div>
       </div>
-      <div class="row">
-        <div><label>入学年月</label><input type="month" id="p-start"></div>
-        <div><label>预计毕业年月</label><input type="month" id="p-grad"></div>
-      </div>
-      <label>毕业目标（几篇、什么级别）</label>
-      <input id="p-goal" placeholder="如：2 篇 CSSCI / 1 篇 SCI 二区">
-      <div style="margin-top:12px;"><button class="btn block" id="saveProfileBtn">💾 保存身份</button></div>
+      <div class="muted" id="autoInfo" style="margin-top:8px;"></div>
+      <div style="margin-top:10px;"><button class="btn block" id="saveProfileBtn">💾 保存</button></div>
+    </div>
+
+    <div class="card" id="actionCard" style="display:none">
+      <h3>🎯 我现在该做什么 <span class="tag">核心面板</span></h3>
+      <div id="stageFocus"></div>
+      <div style="margin-top:12px;"><button class="btn block" id="planBtn">🤖 生成我的下一步计划</button></div>
+      <div id="planOut" class="kb-preview" style="display:none; margin-top:10px; white-space:pre-wrap; color:var(--text);"></div>
     </div>
 
     <div class="card">
@@ -168,16 +170,10 @@
     </div>
 
     <div class="card">
-      <h3>📝 周报生成 <span class="tag">3 个问题 → 可发给导师的周报</span></h3>
-      <label>1. 这周做了什么？（研究/课程/阅读/实验/写作）</label>
-      <textarea id="w1" rows="2" placeholder="如：读完了 3 篇文献，整理了数据…"></textarea>
-      <label>2. 卡在哪了？有什么问题需要求助？</label>
-      <textarea id="w2" rows="2" placeholder="如：论文指标不知道选哪个好…"></textarea>
-      <label>3. 下周计划是什么？</label>
-      <textarea id="w3" rows="2" placeholder="如：完成开题报告初稿…"></textarea>
-      <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
-        <button class="btn" id="genReportBtn" style="flex:1 1 100%;">✨ 生成周报</button>
-        <button class="btn ghost" id="aiReportBtn" style="flex:1;">🤖 AI 润色</button>
+      <h3>📝 周报 <span class="tag">随手写几句 → AI 整理成正式周报</span></h3>
+      <textarea id="r1" rows="3" placeholder="这周都干了啥？比如：读了 3 篇文献、整理了数据、卡在指标选择…"></textarea>
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <button class="btn" id="genReportBtn" style="flex:1">🤖 AI 生成周报</button>
         <button class="btn ghost" id="copyReportBtn" style="flex:0 0 80px;">复制</button>
       </div>
       <div id="reportOut" class="kb-preview" style="display:none; margin-top:10px; white-space:pre-wrap; color:var(--text);"></div>
@@ -231,9 +227,10 @@
     <h3>📖 使用手册</h3>
     <div class="small" style="line-height:2; color:var(--text);">
       <b>🎯 毕业进度页</b><br>
-      1. 填好「我的身份」→ 点保存<br>
-      2. 自动生成里程碑进度条 + 风险提醒 + 任务清单 + 毕业要求核对<br>
-      3. 每周写 3 句话 → 点「生成周报」；有 AI 时再点「AI 润色」变正式周报发给导师<br><br>
+      1. 填「我的身份」（专业/入学/学制/目标）→ 保存，其余自动算<br>
+      2. 看「我现在该做什么」：当前阶段 + 该做的事 + 一键 AI 生成未来 30 天计划<br>
+      3. 里程碑 / 风险提醒 / 毕业要求核对 / 任务清单<br>
+      4. 周报：随手写几句 → 「AI 生成周报」整理成正式版发给导师<br><br>
       <b>📚 学术问答页</b><br>
       1. 直接问学术常识（期刊/论文/毕业流程都行），可以连续追问，AI 记得上文<br>
       2. 每条消息右下角「⋯」可复制 / 编辑 / 删除<br>
@@ -357,25 +354,19 @@ function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;'
 /* ================= 身份 ================= */
 function fillProfileForm(){
   document.getElementById('p-major').value = profile.major||'';
-  document.getElementById('p-school').value = profile.school||'';
-  document.getElementById('p-grade').value = profile.grade||'';
   document.getElementById('p-duration').value = profile.duration||'3';
   document.getElementById('p-start').value = profile.start||'';
-  document.getElementById('p-grad').value = profile.grad||'';
   document.getElementById('p-goal').value = profile.goal||'';
 }
 function saveProfile(){
   profile = {
     major: document.getElementById('p-major').value.trim(),
-    school: document.getElementById('p-school').value.trim(),
-    grade: document.getElementById('p-grade').value,
     duration: document.getElementById('p-duration').value,
     start: document.getElementById('p-start').value,
-    grad: document.getElementById('p-grad').value,
     goal: document.getElementById('p-goal').value.trim()
   };
-  // 没填毕业时间时按学制自动推
-  if(!profile.grad && profile.start && profile.duration){
+  // 毕业时间按学制自动推
+  if(profile.start && profile.duration){
     const d = monthToDate(profile.start);
     d.setMonth(d.getMonth() + Math.round(parseFloat(profile.duration)*12));
     profile.grad = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
@@ -387,7 +378,7 @@ function saveProfile(){
     DEFAULT_TASKS.forEach(t=>{ tasks[t.id] = {name:t.name, stage:t.stage, done:false}; });
     save(LS.tasks, tasks);
   }
-  renderMilestone(); renderTasks();
+  renderMilestone(); renderTasks(); renderChecks(); renderStageFocus();
   showToast('✅ 身份已保存');
 }
 function showToast(msg){
@@ -398,22 +389,31 @@ function showToast(msg){
   setTimeout(()=>el.remove(), 1800);
 }
 
-/* ================= 周报 ================= */
-function genReport(){
-  const a = document.getElementById('w1').value.trim();
-  const b = document.getElementById('w2').value.trim();
-  const c = document.getElementById('w3').value.trim();
-  if(!a && !b && !c){ showToast('请至少填一个问题'); return; }
-  const now = new Date();
-  const dateStr = now.getMonth()+1 + '月' + now.getDate() + '日';
-  const out = '【' + (profile.school||'') + ' ' + (profile.major||'') + ' 周报 · ' + dateStr + '】\n\n' +
-    '【本周进展】\n' + (a||'（未填写）') + '\n\n' +
-    '【问题与求助】\n' + (b||'暂无') + '\n\n' +
-    '【下周计划】\n' + (c||'（未填写）');
-  document.getElementById('reportOut').style.display='block';
-  document.getElementById('reportOut').textContent = out;
-  document.getElementById('copyReportBtn').dataset.text = out;
-  showToast('✅ 周报已生成');
+/* ================= 周报（随手写 → AI 整理） ================= */
+async function genReport(){
+  const txt = document.getElementById('r1').value.trim();
+  if(!txt){ showToast('先写几句这周干了啥'); return; }
+  const out = document.getElementById('reportOut');
+  out.style.display = 'block';
+  if(settings.proxy){
+    const btn = document.getElementById('genReportBtn'); btn.disabled = true; btn.textContent = '生成中…';
+    out.textContent = '🤖 AI 正在整理周报…';
+    const sys = '你是「研途 GradMate」的周报助手。用户随手记了本周内容，请整理成正式、专业、可直接发给导师的周报，结构包含【本周进展】【问题与求助】【下周计划】；只基于用户写的内容，不要虚构；下周计划可合理补充。只输出周报正文。';
+    try{
+      const ans = await callAI([{role:'system', content: sys}, {role:'user', content: '本周随手记：' + txt}]);
+      out.textContent = ans;
+      document.getElementById('copyReportBtn').dataset.text = ans;
+      showToast('✅ AI 周报已生成');
+    }catch(e){ out.textContent = '生成失败：' + e.message; }
+    btn.disabled = false; btn.textContent = '🤖 AI 生成周报';
+  } else {
+    const now = new Date();
+    const dateStr = (now.getMonth()+1) + '月' + now.getDate() + '日';
+    const simple = '【周报 · ' + dateStr + '】\n\n【本周进展】\n' + txt + '\n\n【问题与求助】\n（未填写）\n\n【下周计划】\n（未填写）';
+    out.textContent = simple;
+    document.getElementById('copyReportBtn').dataset.text = simple;
+    showToast('📝 已生成（配置 AI 后会自动润色成正式周报）');
+  }
 }
 async function copyReport(){
   const el = document.getElementById('reportOut');
@@ -446,27 +446,53 @@ document.getElementById('checkList').addEventListener('change', function(e){
   renderChecks();
 });
 
-/* ================= AI 润色周报 ================= */
-document.getElementById('aiReportBtn').onclick = async function(){
-  const a = document.getElementById('w1').value.trim();
-  const b = document.getElementById('w2').value.trim();
-  const c = document.getElementById('w3').value.trim();
-  if(!a && !b && !c){ showToast('请先填写周报的三个问题'); return; }
-  if(!settings.proxy){ showToast('请先在 ⚙️ 设置里配置 AI 代理地址'); return; }
-  const btn = this; btn.disabled = true; btn.textContent = '润色中…';
-  const out = document.getElementById('reportOut');
-  out.style.display = 'block'; out.textContent = '🤖 AI 正在润色周报…';
-  const sys = '你是「研途 GradMate」的周报助手。用户填了 3 段草稿（本周进展/问题/下周计划），请你润色成正式、专业、可直接发给导师的周报：保留【本周进展】【问题与求助】【下周计划】三段结构，语言简洁有条理，可适当补充衔接和语气，但不要虚构用户没做的事。只输出周报正文。';
-  const q = '本周进展：' + (a||'（未填写）') + '\n问题与求助：' + (b||'暂无') + '\n下周计划：' + (c||'（未填写）');
-  try{
-    const answer = await callAI([{role:'system', content: sys}, {role:'user', content: q}]);
-    out.textContent = answer;
-    document.getElementById('copyReportBtn').dataset.text = answer;
-    showToast('✅ AI 周报已生成');
-  }catch(err){
-    out.textContent = '润色失败：' + err.message;
+/* ================= 当前阶段该做什么 ================= */
+const STAGE_ACTIONS = [
+  {title:'课程 + 定方向', tips:['修满学分，别拖到研二','和导师确定研究方向','开始读领域经典文献 20+ 篇']},
+  {title:'定方向 + 选题', tips:['把方向缩小到一个具体问题','和导师确认选题可行性','建文献管理库（如 Zotero）']},
+  {title:'文献综述', tips:['完成文献综述初稿','找到研究空白','小论文选题落地']},
+  {title:'开题', tips:['写开题报告（背景/综述/内容/方法/进度）','准备开题答辩 PPT','开题后原则上不改方向']},
+  {title:'中期检查', tips:['完成大论文初稿 50%','准备中期报告','发现问题及时和导师对齐']},
+  {title:'预答辩', tips:['完成论文全稿','按导师意见修改','模拟答辩提问']},
+  {title:'盲审/外审', tips:['论文格式排版，反复校对','盲审送审','按外审意见认真修改']},
+  {title:'答辩 + 学位', tips:['准备答辩 PPT 并演练','答辩通过后提交终稿','提交学位申请材料']}
+];
+function renderStageFocus(){
+  const card = document.getElementById('actionCard');
+  const pct = getPct();
+  if(pct==null){ if(card) card.style.display='none'; return; }
+  card.style.display='block';
+  const curIdx = STAGES.findIndex(s=>s.start<=pct && pct<=s.end);
+  const i = curIdx<0 ? 0 : curIdx;
+  const a = STAGE_ACTIONS[i];
+  const days = Math.ceil((monthToDate(profile.grad)-Date.now())/86400000);
+  let grade = '';
+  if(profile.start){
+    const y = Math.floor((Date.now()-monthToDate(profile.start))/31536000000) + 1;
+    grade = '研' + Math.min(3, Math.max(1, y));
   }
-  btn.disabled = false; btn.textContent = '🤖 AI 润色';
+  const info = document.getElementById('autoInfo');
+  if(info) info.textContent = '自动计算：当前' + (grade?' '+grade:'') + (days>0?' · 距毕业约 '+days+' 天':'') + (profile.grad?' · 预计毕业 '+profile.grad:'');
+  document.getElementById('stageFocus').innerHTML =
+    '<div class="stage-now">当前阶段：<b>「'+STAGES[i].name+'」</b> — '+a.title+'</div>' +
+    a.tips.map(function(t){ return '<div class="tip">· '+t+'</div>'; }).join('');
+}
+document.getElementById('planBtn').onclick = async function(){
+  if(!profile.start || !profile.grad){ showToast('请先保存身份'); return; }
+  if(!settings.proxy){ showToast('请先在 ⚙️ 设置里配置 AI 代理地址'); return; }
+  const btn = this; btn.disabled = true; btn.textContent = '生成中…';
+  const out = document.getElementById('planOut'); out.style.display='block'; out.textContent='🤖 正在为你定制未来 30 天计划…';
+  const pct = getPct();
+  const curIdx = STAGES.findIndex(s=>s.start<=pct && pct<=s.end);
+  const stageName = STAGES[curIdx<0?0:curIdx].name;
+  const days = Math.ceil((monthToDate(profile.grad)-Date.now())/86400000);
+  const sys = '你是「研途 GradMate」的进度规划助手。请结合用户身份和当前阶段，输出一份未来 30 天的具体行动计划：分成 4 周，每周给出目标、每天 2-3 个可执行动作、需要找导师确认的事项、风险提示。语气像靠谱的师兄/师姐。只输出计划正文。';
+  const q = '我的情况：专业='+(profile.major||'未填')+'，当前阶段=「'+stageName+'」，距毕业约 '+days+' 天，毕业目标='+(profile.goal||'未填')+'。请给我未来 30 天的下一步计划。';
+  try{
+    const ans = await callAI([{role:'system', content: sys}, {role:'user', content: q}]);
+    out.textContent = ans;
+  }catch(e){ out.textContent = '生成失败：' + e.message; }
+  btn.disabled = false; btn.textContent = '🤖 生成我的下一步计划';
 };
 
 /* ================= 问答：内置知识库（演示模式） ================= */
@@ -807,6 +833,7 @@ updateModeBadge();
 renderMilestone();
 renderTasks();
 renderChecks();
+renderStageFocus();
 loadChat();
 </script>
 </body>
