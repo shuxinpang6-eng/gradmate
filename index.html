@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>研途 GradMate · 研究生学术助手</title>
+<style>
+  :root{
+    --bg:#f7f2e9; --card:#fffdf8; --primary:#b08968; --primary-dark:#8a5a44;
+    --text:#4a3728; --muted:#9c8873; --border:#e8dcc8; --ok:#6b9e6b; --warn:#c98a3d; --danger:#c0564f;
+    --radius:14px; --shadow:0 2px 10px rgba(138,90,68,.08);
+  }
+  *{box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent;}
+  body{font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+       background:var(--bg); color:var(--text); min-height:100vh;}
+  header{position:sticky; top:0; z-index:20; background:rgba(247,242,233,.95); backdrop-filter:blur(8px);
+         border-bottom:1px solid var(--border); padding:12px 16px; display:flex; align-items:center; gap:10px;}
+  .logo{font-weight:800; font-size:18px; color:var(--primary-dark); flex:1; letter-spacing:.5px;}
+  .logo small{font-weight:400; font-size:11px; color:var(--muted); margin-left:6px;}
+  .icon-btn{background:var(--card); border:1px solid var(--border); border-radius:10px; padding:6px 10px;
+            font-size:13px; color:var(--primary-dark); cursor:pointer;}
+  .icon-btn:hover{background:#f1e8da;}
+  main{max-width:720px; margin:0 auto; padding:14px 14px 90px;}
+  .page{display:none;} .page.active{display:block;}
+  .card{background:var(--card); border:1px solid var(--border); border-radius:var(--radius);
+        box-shadow:var(--shadow); padding:16px; margin-bottom:14px;}
+  .card h3{font-size:15px; margin-bottom:10px; color:var(--primary-dark);}
+  .card h3 .tag{font-size:11px; font-weight:400; color:var(--muted); margin-left:6px;}
+  .muted{color:var(--muted); font-size:12px;}
+  .small{font-size:12px;}
+  label{display:block; font-size:12px; color:var(--muted); margin:8px 0 3px;}
+  input,select,textarea{width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:9px;
+        font-size:14px; background:#fff; color:var(--text); font-family:inherit;}
+  input:focus,select:focus,textarea:focus{outline:none; border-color:var(--primary);}
+  .row{display:flex; gap:10px;} .row>*{flex:1;}
+  .btn{background:var(--primary); color:#fff; border:none; border-radius:10px; padding:10px 16px;
+       font-size:14px; cursor:pointer; font-weight:600;}
+  .btn:hover{background:var(--primary-dark);}
+  .btn.ghost{background:transparent; color:var(--primary-dark); border:1px solid var(--border);}
+  .btn.block{width:100%;}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  /* 底部 Tab */
+  nav.tabs{position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border);
+       display:flex; padding:6px 0 calc(6px + env(safe-area-inset-bottom)); z-index:20;}
+  nav.tabs button{flex:1; background:none; border:none; padding:8px 0; font-size:13px; color:var(--muted);
+       cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;}
+  nav.tabs button .em{font-size:18px;}
+  nav.tabs button.active{color:var(--primary-dark); font-weight:700;}
+  /* 里程碑 */
+  .milestone{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;}
+  .m-node{flex:1 1 90px; border:1px solid var(--border); border-radius:10px; padding:8px 6px; text-align:center;
+       font-size:11px; background:#fbf7f0; position:relative;}
+  .m-node.done{border-color:var(--ok); background:#eef5ee; color:#3f7a3f;}
+  .m-node.current{border-color:var(--primary); background:#f5ead9; font-weight:700;}
+  .m-node .dot{display:block; margin:0 auto 4px; width:10px; height:10px; border-radius:50%; background:#ddd;}
+  .m-node.done .dot{background:var(--ok);} .m-node.current .dot{background:var(--primary);}
+  .bar{height:8px; background:#eee4d3; border-radius:5px; overflow:hidden; margin:10px 0 4px;}
+  .bar>div{height:100%; background:linear-gradient(90deg,var(--primary),#d4a373); border-radius:5px; transition:width .4s;}
+  /* 任务 */
+  .task{display:flex; align-items:center; gap:10px; padding:9px 4px; border-bottom:1px dashed var(--border);}
+  .task:last-child{border-bottom:none;}
+  .task input[type=checkbox]{width:18px; height:18px; accent-color:var(--primary);}
+  .task .t-name{flex:1; font-size:14px;}
+  .task.done .t-name{text-decoration:line-through; color:var(--muted);}
+  .task .t-del{background:none; border:none; color:var(--muted); cursor:pointer; font-size:15px;}
+  .task .t-stage{font-size:10px; color:var(--muted); background:#f1e8da; border-radius:6px; padding:2px 6px;}
+  /* 风险 */
+  .risk{border-left:4px solid var(--warn); background:#fdf6ec; padding:10px 12px; border-radius:8px; margin-bottom:8px;}
+  .risk.danger{border-color:var(--danger); background:#fdf0ef;}
+  .risk.ok{border-color:var(--ok); background:#f0f7f0;}
+  .risk b{display:block; font-size:13px; margin-bottom:2px;}
+  .risk span{font-size:12px; color:var(--text); line-height:1.6;}
+  /* 问答 */
+  #chat{height:calc(100vh - 300px); min-height:320px; overflow-y:auto; padding:6px 2px;}
+  .msg{max-width:88%; margin:8px 0; padding:10px 13px; border-radius:14px; font-size:14px; line-height:1.7; white-space:pre-wrap; word-break:break-word;}
+  .msg.user{margin-left:auto; background:var(--primary); color:#fff; border-bottom-right-radius:4px;}
+  .msg.bot{margin-right:auto; background:#fff; border:1px solid var(--border); border-bottom-left-radius:4px;}
+  .msg.bot .src{display:block; font-size:11px; color:var(--muted); margin-top:6px;}
+  .chat-input{display:flex; gap:8px; align-items:flex-end;}
+  .chat-input textarea{flex:1; resize:none; min-height:44px; max-height:120px;}
+  .mode-badge{display:inline-block; font-size:11px; padding:2px 8px; border-radius:20px; background:#f1e8da; color:var(--primary-dark); margin-left:6px;}
+  .mode-badge.ai{background:#e3f0e3; color:#3f7a3f;}
+  /* 弹窗 */
+  .modal-mask{display:none; position:fixed; inset:0; background:rgba(0,0,0,.4); z-index:40; align-items:flex-end; justify-content:center;}
+  .modal-mask.show{display:flex;}
+  .modal{background:var(--card); width:100%; max-width:720px; border-radius:18px 18px 0 0; padding:18px 16px 26px; max-height:85vh; overflow-y:auto;}
+  .modal h3{font-size:16px; margin-bottom:12px; color:var(--primary-dark);}
+  .modal .close{float:right; background:none; border:none; font-size:20px; color:var(--muted); cursor:pointer;}
+  .warn-text{font-size:12px; color:var(--danger); margin-top:8px;}
+  .ok-text{font-size:12px; color:var(--ok); margin-top:8px;}
+  .kb-preview{font-size:12px; color:var(--muted); background:#fbf7f0; border-radius:8px; padding:8px 10px; margin-top:8px; max-height:120px; overflow-y:auto;}
+  .empty{padding:26px 10px; text-align:center; color:var(--muted); font-size:13px; line-height:1.8;}
+  .stat{display:flex; gap:10px; margin-top:8px;}
+  .stat>div{flex:1; text-align:center; background:#fbf7f0; border-radius:10px; padding:8px;}
+  .stat b{display:block; font-size:18px; color:var(--primary-dark);}
+  .stat span{font-size:11px; color:var(--muted);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">🎓 研途 GradMate<small>研究生学术助手</small></div>
+  <button class="icon-btn" id="manualBtn">📖 使用手册</button>
+  <button class="icon-btn" id="settingsBtn">⚙️ 设置</button>
+</header>
+
+<main>
+  <!-- ============ 页面1：毕业进度 ============ -->
+  <section class="page active" id="page-progress">
+    <div class="card">
+      <h3>🧑‍🎓 我的身份 <span class="tag">AI 会记住这些，给你更准的建议</span></h3>
+      <div class="row">
+        <div><label>专业/方向</label><input id="p-major" placeholder="如：生态学"></div>
+        <div><label>学校</label><input id="p-school" placeholder="如：北京林业大学"></div>
+      </div>
+      <div class="row">
+        <div><label>当前年级</label>
+          <select id="p-grade"><option value="">请选择</option><option>研一</option><option>研二</option><option>研三</option></select>
+        </div>
+        <div><label>学制</label>
+          <select id="p-duration"><option value="3">学硕 3 年</option><option value="2">专硕 2 年</option><option value="2.5">专硕 2.5 年</option></select>
+        </div>
+      </div>
+      <div class="row">
+        <div><label>入学年月</label><input type="month" id="p-start"></div>
+        <div><label>预计毕业年月</label><input type="month" id="p-grad"></div>
+      </div>
+      <label>毕业目标（几篇、什么级别）</label>
+      <input id="p-goal" placeholder="如：2 篇 CSSCI / 1 篇 SCI 二区">
+      <div style="margin-top:12px;"><button class="btn block" id="saveProfileBtn">💾 保存身份</button></div>
+    </div>
+
+    <div class="card">
+      <h3>🗓️ 毕业里程碑</h3>
+      <div class="bar"><div id="progressBar" style="width:0%"></div></div>
+      <div class="muted" id="progressPct">尚未生成进度（先保存身份）</div>
+      <div class="milestone" id="milestoneBox"></div>
+      <div id="countdownBox" class="stat"></div>
+    </div>
+
+    <div class="card" id="riskCard" style="display:none">
+      <h3>⚠️ 风险提醒</h3>
+      <div id="riskList"></div>
+    </div>
+
+    <div class="card">
+      <h3>✅ 任务清单 <span class="tag">勾选完成，自动保存</span></h3>
+      <div id="taskList"></div>
+      <div class="row" style="margin-top:10px;">
+        <input id="newTask" placeholder="添加自定义任务，如：找导师确认选题">
+        <button class="btn ghost" id="addTaskBtn" style="flex:0 0 70px;">添加</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>📝 周报生成 <span class="tag">3 个问题 → 可发给导师的周报</span></h3>
+      <label>1. 这周做了什么？（研究/课程/阅读/实验/写作）</label>
+      <textarea id="w1" rows="2" placeholder="如：读完了 3 篇文献，整理了数据…"></textarea>
+      <label>2. 卡在哪了？有什么问题需要求助？</label>
+      <textarea id="w2" rows="2" placeholder="如：论文指标不知道选哪个好…"></textarea>
+      <label>3. 下周计划是什么？</label>
+      <textarea id="w3" rows="2" placeholder="如：完成开题报告初稿…"></textarea>
+      <div style="margin-top:10px; display:flex; gap:8px;">
+        <button class="btn" id="genReportBtn" style="flex:1">✨ 生成周报</button>
+        <button class="btn ghost" id="copyReportBtn" style="flex:0 0 80px;">复制</button>
+      </div>
+      <div id="reportOut" class="kb-preview" style="display:none; margin-top:10px; white-space:pre-wrap; color:var(--text);"></div>
+    </div>
+  </section>
+
+  <!-- ============ 页面2：学术问答 ============ -->
+  <section class="page" id="page-qa">
+    <div class="card" style="padding:10px 14px;">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <b style="font-size:14px; color:var(--primary-dark);">📚 学术常识问答</b>
+        <span class="mode-badge" id="modeBadge">演示模式</span>
+      </div>
+      <div class="muted" style="margin-top:4px;">问任何学术常识：期刊体系 / 论文类型 / 毕业流程，AI 会结合你的身份回答</div>
+    </div>
+    <div id="chat"></div>
+    <div class="chat-input">
+      <textarea id="qInput" rows="1" placeholder="输入问题，如：CSSCI 和北大核心有什么区别？"></textarea>
+      <button class="btn" id="sendBtn">发送</button>
+    </div>
+  </section>
+</main>
+
+<nav class="tabs">
+  <button class="active" data-tab="progress"><span class="em">🎯</span>毕业进度</button>
+  <button data-tab="qa"><span class="em">📚</span>学术问答</button>
+</nav>
+
+<!-- 设置弹窗 -->
+<div class="modal-mask" id="settingsModal">
+  <div class="modal">
+    <button class="close" data-close="settingsModal">✕</button>
+    <h3>⚙️ 设置</h3>
+    <label>AI 代理地址（Cloudflare Worker 的 URL，留空 = 演示模式）</label>
+    <input id="s-proxy" placeholder="https://xxx.workers.dev">
+    <label>模型名（默认免费模型 glm-4-flash）</label>
+    <input id="s-model" placeholder="glm-4-flash">
+    <div style="margin-top:12px; display:flex; gap:8px;">
+      <button class="btn" id="saveSettingsBtn" style="flex:1">保存</button>
+      <button class="btn ghost" id="testProxyBtn" style="flex:0 0 90px;">测试连接</button>
+    </div>
+    <div id="settingsMsg"></div>
+    <div class="muted" style="margin-top:10px;">💡 没填代理地址时，问答页会用「内置知识库」演示回答；填入代理地址后自动切换为真实 AI（RAG 检索 + 大模型回答）。</div>
+  </div>
+</div>
+
+<!-- 使用手册弹窗 -->
+<div class="modal-mask" id="manualModal">
+  <div class="modal">
+    <button class="close" data-close="manualModal">✕</button>
+    <h3>📖 使用手册</h3>
+    <div class="small" style="line-height:2; color:var(--text);">
+      <b>🎯 毕业进度页</b><br>
+      1. 填好「我的身份」（专业/学校/年级/入学/毕业时间/目标）→ 点保存<br>
+      2. 系统自动生成里程碑进度条 + 风险提醒 + 任务清单<br>
+      3. 每周用「周报生成」写 3 句话，一键生成周报复制发给导师<br><br>
+      <b>📚 学术问答页</b><br>
+      1. 直接问学术常识（期刊/论文/毕业流程都行）<br>
+      2. 「演示模式」= 内置知识库回答，先体验<br>
+      3. 在 ⚙️ 设置里填入代理地址后 = 真实 AI（记得先保存身份，回答会更贴合你的专业）<br><br>
+      <b>🔒 隐私</b><br>
+      你的身份、任务、周报都存在自己浏览器里（localStorage），不上传任何服务器。<br><br>
+      <b>常见问题</b><br>
+      · 想清空数据：浏览器设置里清除该网站数据<br>
+      · 演示模式回答比较简单：接上 AI 后质量大幅提升
+    </div>
+  </div>
+</div>
+
+<script>
+/* ================= 数据与状态 ================= */
+const LS = {
+  profile:'gm_profile', tasks:'gm_tasks', settings:'gm_settings', chat:'gm_chat'
+};
+let profile = load(LS.profile, {});
+let tasks = load(LS.tasks, {});
+let settings = load(LS.settings, {proxy:'', model:'glm-4-flash'});
+
+function load(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)); return v==null? d : v; }catch(e){ return d; } }
+function save(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
+
+/* ================= 里程碑 ================= */
+const STAGES = [
+  {name:'课程学习', start:0, end:15},
+  {name:'确定方向', start:12, end:28},
+  {name:'文献综述', start:25, end:45},
+  {name:'开题', start:40, end:60},
+  {name:'中期检查', start:55, end:75},
+  {name:'预答辩', start:75, end:88},
+  {name:'盲审/外审', start:82, end:94},
+  {name:'答辩+学位', start:92, end:100}
+];
+const DEFAULT_TASKS = [
+  {id:'t1', stage:'课程学习', name:'确定导师并沟通研究兴趣'},
+  {id:'t2', stage:'课程学习', name:'读完培养方案，抄下毕业要求'},
+  {id:'t3', stage:'确定方向', name:'和导师确定研究方向'},
+  {id:'t4', stage:'文献综述', name:'完成领域文献综述初稿'},
+  {id:'t5', stage:'开题', name:'确定论文选题'},
+  {id:'t6', stage:'开题', name:'完成开题报告并参加开题答辩'},
+  {id:'t7', stage:'中期检查', name:'完成中期报告并汇报'},
+  {id:'t8', stage:'预答辩', name:'完成论文初稿并参加预答辩'},
+  {id:'t9', stage:'盲审/外审', name:'修改论文，送盲审'},
+  {id:'t10', stage:'答辩+学位', name:'正式答辩并提交最终版'}
+];
+
+function monthToDate(v){ return v ? new Date(v + '-01') : null; }
+function getPct(){
+  if(!profile.start || !profile.grad) return null;
+  const s = monthToDate(profile.start), g = monthToDate(profile.grad);
+  const total = g - s, now = Date.now() - s;
+  if(total <= 0) return 100;
+  return Math.max(0, Math.min(100, now/total*100));
+}
+function renderMilestone(){
+  const pct = getPct();
+  const box = document.getElementById('milestoneBox');
+  if(pct==null){ box.innerHTML=''; document.getElementById('progressPct').textContent='尚未生成进度（先保存身份）'; document.getElementById('progressBar').style.width='0%'; document.getElementById('countdownBox').innerHTML=''; return; }
+  document.getElementById('progressBar').style.width = pct.toFixed(1)+'%';
+  document.getElementById('progressPct').textContent = '总体进度 ' + pct.toFixed(0) + '% · 已用时 ' + Math.floor((Date.now()-monthToDate(profile.start))/86400000) + ' 天';
+  box.innerHTML = STAGES.map((s,i)=>{
+    const cls = s.end < pct ? 'done' : (s.start <= pct ? 'current' : '');
+    return '<div class="m-node '+cls+'"><span class="dot"></span>'+s.name+'</div>';
+  }).join('');
+  // 倒计时
+  const g = monthToDate(profile.grad), days = Math.ceil((g - Date.now())/86400000);
+  let cd = '';
+  if(days > 0){
+    const months = (days/30.44).toFixed(1);
+    cd = '<div class="stat"><div><b>'+days+'</b><span>距毕业（天）</span></div>'+
+         '<div><b>'+months+'</b><span>剩余（月）</span></div>'+
+         '<div><b>'+ (STAGES.filter(s=>s.end<pct).length) +'/'+STAGES.length +'</b><span>已完成节点</span></div></div>';
+  } else {
+    cd = '<div class="stat"><div><b>⚠️</b><span>已到预计毕业时间</span></div></div>';
+  }
+  document.getElementById('countdownBox').innerHTML = cd;
+  renderRisk(days);
+}
+function renderRisk(days){
+  const card = document.getElementById('riskCard');
+  const pct = getPct();
+  if(pct==null){ card.style.display='none'; return; }
+  const curIdx = STAGES.findIndex(s=>s.start<=pct && pct<=s.end);
+  const cur = curIdx<0 ? 0 : curIdx;
+  const risks = [];
+  const months = days/30.44;
+  if(days <= 0) risks.push({d:true, t:'已到预计毕业时间', dsc:'请立即核对：学分是否修满、论文是否送审、学位申请材料是否提交。'});
+  else if(months < 6 && cur < 6) risks.push({d:true, t:'距毕业不足 6 个月，还没到预答辩/盲审阶段', dsc:'这是高风险信号，立刻和导师确认盲审安排，论文按最终稿标准修改。'});
+  else if(months < 12 && cur < 4) risks.push({d:true, t:'距毕业不足 1 年，还没到开题/中期', dsc:'建议倒排计划：先把开题和中期节点写进日历，每周推进。'});
+  else if(months < 21 && cur < 3) risks.push({d:false, t:'距毕业不足 2 年，方向要尽快定', dsc:'开题是最容易拖出延毕风险的节点，尽早和导师敲定选题。'});
+  if(cur >= 1 && cur < 3) risks.push({d:false, t:'你正处于「'+STAGES[cur].name+'」阶段', dsc:'当前重点是确定选题 + 文献综述，小论文建议同步开始积累（投稿周期 3-12 个月）。'});
+  if(risks.length===0) risks.push({d:false, t:'当前进度正常', dsc:'按计划推进即可，记得每周写周报记录进展。'});
+  card.style.display='block';
+  document.getElementById('riskList').innerHTML = risks.map(r=>
+    '<div class="risk '+(r.d?'danger':'ok')+'"><b>'+(r.d?'🔴 ':'🟢 ')+r.t+'</b><span>'+r.dsc+'</span></div>'
+  ).join('');
+}
+
+/* ================= 任务 ================= */
+function renderTasks(){
+  const box = document.getElementById('taskList');
+  const list = DEFAULT_TASKS.map(d=>({...d, done:!!tasks[d.id]}));
+  Object.keys(tasks).forEach(id=>{ if(!list.find(t=>t.id===id) && tasks[id] && tasks[id].name){
+    list.push({id, stage: tasks[id].stage||'自定义', name: tasks[id].name, done: tasks[id].done});
+  }});
+  if(list.length===0){ box.innerHTML='<div class="empty">暂无任务，先保存身份生成默认任务</div>'; return; }
+  box.innerHTML = list.map(t=>{
+    const done = t.done ? 'done' : '';
+    return '<div class="task '+done+'" data-id="'+t.id+'">'+
+      '<input type="checkbox" '+(t.done?'checked':'')+' data-check="'+t.id+'">'+
+      '<span class="t-name">'+esc(t.name)+'</span>'+
+      '<span class="t-stage">'+esc(t.stage)+'</span>'+
+      '<button class="t-del" data-del="'+t.id+'">✕</button></div>';
+  }).join('');
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* ================= 身份 ================= */
+function fillProfileForm(){
+  document.getElementById('p-major').value = profile.major||'';
+  document.getElementById('p-school').value = profile.school||'';
+  document.getElementById('p-grade').value = profile.grade||'';
+  document.getElementById('p-duration').value = profile.duration||'3';
+  document.getElementById('p-start').value = profile.start||'';
+  document.getElementById('p-grad').value = profile.grad||'';
+  document.getElementById('p-goal').value = profile.goal||'';
+}
+function saveProfile(){
+  profile = {
+    major: document.getElementById('p-major').value.trim(),
+    school: document.getElementById('p-school').value.trim(),
+    grade: document.getElementById('p-grade').value,
+    duration: document.getElementById('p-duration').value,
+    start: document.getElementById('p-start').value,
+    grad: document.getElementById('p-grad').value,
+    goal: document.getElementById('p-goal').value.trim()
+  };
+  // 没填毕业时间时按学制自动推
+  if(!profile.grad && profile.start && profile.duration){
+    const d = monthToDate(profile.start);
+    d.setMonth(d.getMonth() + Math.round(parseFloat(profile.duration)*12));
+    profile.grad = d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0');
+  }
+  save(LS.profile, profile);
+  fillProfileForm();
+  // 首次生成默认任务
+  if(Object.keys(tasks).length===0){
+    DEFAULT_TASKS.forEach(t=>{ tasks[t.id] = {name:t.name, stage:t.stage, done:false}; });
+    save(LS.tasks, tasks);
+  }
+  renderMilestone(); renderTasks();
+  showToast('✅ 身份已保存');
+}
+function showToast(msg){
+  const el = document.createElement('div');
+  el.style.cssText = 'position:fixed;left:50%;bottom:80px;transform:translateX(-50%);background:rgba(74,55,40,.92);color:#fff;padding:10px 18px;border-radius:20px;font-size:13px;z-index:99;';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 1800);
+}
+
+/* ================= 周报 ================= */
+function genReport(){
+  const a = document.getElementById('w1').value.trim();
+  const b = document.getElementById('w2').value.trim();
+  const c = document.getElementById('w3').value.trim();
+  if(!a && !b && !c){ showToast('请至少填一个问题'); return; }
+  const now = new Date();
+  const dateStr = now.getMonth()+1 + '月' + now.getDate() + '日';
+  const out = '【' + (profile.school||'') + ' ' + (profile.major||'') + ' 周报 · ' + dateStr + '】\n\n' +
+    '【本周进展】\n' + (a||'（未填写）') + '\n\n' +
+    '【问题与求助】\n' + (b||'暂无') + '\n\n' +
+    '【下周计划】\n' + (c||'（未填写）');
+  document.getElementById('reportOut').style.display='block';
+  document.getElementById('reportOut').textContent = out;
+  document.getElementById('copyReportBtn').dataset.text = out;
+  showToast('✅ 周报已生成');
+}
+async function copyReport(){
+  const el = document.getElementById('reportOut');
+  if(el.style.display==='none'){ showToast('先生成周报再复制'); return; }
+  try{ await navigator.clipboard.writeText(el.textContent); showToast('📋 已复制，可粘贴发给导师'); }
+  catch(e){ showToast('复制失败，请手动长按选择复制'); }
+}
+
+/* ================= 问答：内置知识库（演示模式） ================= */
+const MINI_KB = [
+  {k:['中文核心','核心期刊','普刊','非核心'], a:'「核心期刊」是对一批质量较高、公认度高的期刊的统称。中国语境下通常指：北大核心、CSSCI、CSCD、科技核心。没进这些目录的叫普刊（非核心）：好发、快，但多数学校不认，满足不了毕业要求。'},
+  {k:['北大核心','中文核心期刊要目总览'], a:'北大核心 = 《中文核心期刊要目总览》，由北京大学图书馆主持、约 3 年更新一版，覆盖文理各领域，是国内最常见的核心标准之一。'},
+  {k:['cssci','南大核心','c刊','南核'], a:'CSSCI（中文社会科学引文索引）由南京大学主持，主要收录人文社科期刊，是文科最看重的核心目录，俗称「南核 / C刊」。和北大核心不完全重合，有的期刊两个都在，有的只在一个。'},
+  {k:['cscd','中国科学引文'], a:'CSCD（中国科学引文数据库）由中科院文献情报中心主持，主要收录理科期刊，是理科常用的中文核心标准之一，常与北大核心并列认可。'},
+  {k:['影响因子','if'], a:'影响因子（IF）= 某期刊前两年论文在第三年被引用的平均次数，衡量期刊整体影响力，不是衡量单篇论文质量。不同学科差异很大，不能跨学科直接比。'},
+  {k:['分区','q1','q2','q3','q4','中科院分区','jcr'], a:'JCR 分区：Web of Science 按影响因子把期刊分为 Q1-Q4（前 25% 为 Q1）。中科院分区：分 1-4 区，1 区约前 5%，更严格。国内高校多以中科院分区为准，如「SCI 二区」一般指中科院二区。'},
+  {k:['sci','科学引文索引'], a:'SCI（科学引文索引）属于科睿唯安 Web of Science，主要收录自然科学期刊，理工科毕业常要求「一篇 SCI」。SSCI 是它的社会科学版，文科发国际期刊看 SSCI。'},
+  {k:['ei','工程索引'], a:'EI（工程索引）主要收录工程技术。注意区分：EI 期刊含金量较高，EI 会议含金量明显偏低，很多学校不认 EI 会议为毕业成果。EI 是国际索引，不是中文「核心期刊」概念。'},
+  {k:['预警期刊','水刊'], a:'预警期刊 = 中科院发布的学术质量/诚信有问题的期刊名单。投稿前务必查一下，很多学校不认预警期刊成果。水刊是审稿松、质量低、收费高的期刊，含金量低，不建议为了「快」去发。'},
+  {k:['oa','开放获取'], a:'OA（开放获取）= 读者免费阅读、作者交文章处理费（APC）的期刊。部分学校对 OA 期刊有额外限制，投稿前确认。'},
+  {k:['小论文','大论文','学位论文','毕业论文'], a:'小论文 = 为满足毕业/评奖要求公开发表的论文（期刊或会议）；大论文 = 毕业答辩用的学位论文（硕士一般 3-8 万字），不公开发表但要查重、盲审、答辩。常见路线：小论文先出，大论文基于小论文扩写整合。注意一稿多投/一稿多发是学术不端。'},
+  {k:['综述','review','文献综述'], a:'综述 = 总结某领域已有研究、梳理脉络、指出空白的文章，不需要做新实验。高水平综述通常由资深研究者写，新手难发。注意：很多学校不把综述算毕业成果，投稿前先确认。'},
+  {k:['会议论文','期刊论文','会议'], a:'期刊论文：完整、周期长（3 个月到 1-2 年）。会议论文：出结果快，计算机等学科很看重（看 CCF A/B/C 分级）；文科一般以期刊为主。'},
+  {k:['录用','见刊','检索','审稿'], a:'发表流程：投稿 → 初审 → 外审 → 大修/小修 → 录用 → 见刊 → 检索。录用=拿到录用通知；见刊=正式出版；检索=被 SCI/EI/CSSCI 收录（见刊≠检索，检索通常滞后 1-6 个月）。毕业要求写「见刊」还是「检索」差别很大。'},
+  {k:['开题','开题报告','开题答辩'], a:'开题一般研二上，是毕业最关键的节点之一：写开题报告（选题背景、文献综述、研究内容、方法、进度安排）+ 开题答辩。开题后原则上不大改方向，改方向=重新开题，时间成本极高。'},
+  {k:['中期','中期检查'], a:'中期检查一般研二下：向导师/学院汇报论文进展，确认能按时毕业。此时发现方向做不下去还来得及补救，是重要的「纠偏点」。'},
+  {k:['盲审','外审'], a:'盲审 = 论文送校外专家匿名评审（专家不知道你是谁），一般在研三上到答辩前 1-3 个月。结果分：通过/修改后通过/不通过。盲审不过可能延毕，是最大的坎之一。'},
+  {k:['预答辩','答辩'], a:'预答辩 = 正式答辩前学院内部模拟答辩，老师提意见帮你改。正式答辩 = 答辩委员会听汇报、提问、投票。答辩通过后还要提交学位申请材料，经学位评定委员会审核才授予学位。'},
+  {k:['毕业要求','毕业条件','延毕'], a:'毕业两大硬条件：①课程学分修满 ②学术成果达标（小论文见刊/录用）③大论文查重+盲审+答辩通过，三项缺一不可。常见延毕原因：学分没修满、小论文没达标、大论文拖延、盲审不过。入学第一学期就要抄下培养方案里的毕业要求原文。'},
+  {k:['csci 和 北大','哪个厉害','哪个好'], a:'对文科来说，CSSCI 和北大核心都是高含金量目录，但看学校要求：有的学院点名要 CSSCI，有的认北大核心。建议先查学院「学位授予细则」里写了哪个，再定投稿目标。'}
+];
+function kbAnswer(q){
+  const ql = q.toLowerCase();
+  let best = null, bestScore = 0;
+  MINI_KB.forEach(entry=>{
+    let score = 0;
+    entry.k.forEach(kw=>{ if(ql.includes(kw.toLowerCase())) score += kw.length; });
+    if(score > bestScore){ bestScore = score; best = entry; }
+  });
+  return best ? best.a : null;
+}
+
+/* ================= 问答：AI 模式（RAG + 代理） ================= */
+const TERMS = ['中文核心','北大核心','核心期刊','csSCI','cssci','c刊','南核','cscd','科技核心','影响因子','分区','q1','q2','q3','q4','中科院','jcr','sci','ssci','ei','a&hci','预警期刊','水刊','oa','开放获取','小论文','大论文','学位论文','毕业论文','综述','文献综述','会议论文','期刊论文','录用','见刊','检索','审稿','开题','中期','盲审','外审','预答辩','答辩','学位申请','毕业要求','延毕','投稿','查重','学分','导师','选题'];
+async function loadDocs(){
+  const names = ['knowledge/知识库1-期刊体系入门.md','knowledge/知识库2-论文类型科普.md','knowledge/知识库3-毕业流程与节点.md'];
+  const chunks = [];
+  for(const n of names){
+    try{
+      const r = await fetch(n);
+      if(!r.ok) continue;
+      const txt = await r.text();
+      // 按空行分块
+      txt.split(/\n\s*\n/).forEach(b=>{ const c = b.trim(); if(c.length>40) chunks.push(c); });
+    }catch(e){}
+  }
+  return chunks;
+}
+function retrieve(q, chunks){
+  const ql = q.toLowerCase();
+  const scored = chunks.map(c=>{
+    const cl = c.toLowerCase();
+    let s = 0;
+    TERMS.forEach(t=>{ if(ql.includes(t)){ const cnt = (cl.split(t).length-1); s += cnt * t.length * 2; } });
+    // 问题里的字与块重叠
+    const qSet = new Set([...ql.replace(/[\s，。？?！!、：:；;（）()""''《》]/g,'')]);
+    let hit = 0; [...cl].forEach(ch=>{ if(qSet.has(ch)) hit++; });
+    s += hit * 0.3;
+    return {c, s};
+  }).filter(x=>x.s>0).sort((a,b)=>b.s-a.s);
+  return scored.slice(0,3).map(x=>x.c).join('\n---\n');
+}
+function buildSystemPrompt(){
+  const p = profile;
+  let identity = '用户身份信息：' +
+    (p.major?'专业：'+p.major+'；':'') + (p.school?'学校：'+p.school+'；':'') +
+    (p.grade?'年级：'+p.grade+'；':'') + (p.start?'入学：'+p.start+'；':'') +
+    (p.grad?'预计毕业：'+p.grad+'；':'') + (p.goal?'毕业目标：'+p.goal+'；':'');
+  if(!p.major && !p.grade) identity += '（用户尚未填写身份，如涉及专业相关问题请先礼貌询问关键信息再回答）';
+  return '你是「研途 GradMate」，一个专为研究生打造的学术成长助手。\n'+
+    '任务：用大白话回答研究生的学术常识问题（期刊体系、论文类型、毕业流程），并结合用户身份给针对性建议。\n'+
+    '规则：\n'+
+    '1. 先给结论再解释，能用列表用列表；专业名词第一次出现带一句大白话解释；回答控制在 200 字内。\n'+
+    '2. 必须参考「参考资料」里的内容回答，资料没有或不确定时明确说"这个我没有可靠依据"，绝不编造具体数字（影响因子、分区、政策条款）。\n'+
+    '3. 涉及学校具体要求（毕业几篇、认不认 EI 会议等）时，提醒"以你们学校研究生院/学院最新文件为准"。\n'+
+    '4. 问题与学术/毕业无关时，礼貌说明你只回答研究生学术与毕业相关问题。\n'+
+    identity+'\n';
+}
+async function askAI(q){
+  const docs = await loadDocs();
+  const ctx = retrieve(q, docs);
+  const messages = [
+    {role:'system', content: buildSystemPrompt() + (ctx ? '\n【参考资料】\n'+ctx : '（无参考资料）')},
+    {role:'user', content: q}
+  ];
+  const r = await fetch(settings.proxy, {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({messages, model: settings.model||'glm-4-flash'})
+  });
+  if(!r.ok) throw new Error('代理返回错误 '+r.status);
+  const data = await r.json();
+  const content = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+  if(!content) throw new Error('未获取到回答');
+  return content;
+}
+
+/* ================= 问答 UI ================= */
+function addMsg(role, text, src){
+  const chat = document.getElementById('chat');
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.textContent = text;
+  if(src){ const s = document.createElement('span'); s.className='src'; s.textContent = src; d.appendChild(s); }
+  chat.appendChild(d);
+  chat.scrollTop = chat.scrollHeight;
+  saveChat();
+}
+function saveChat(){
+  const chat = document.getElementById('chat');
+  const items = [];
+  chat.querySelectorAll('.msg').forEach(m=>{ items.push({role: m.classList.contains('user')?'user':'bot', text: m.firstChild.textContent||''}); });
+  localStorage.setItem(LS.chat, JSON.stringify(items));
+}
+function loadChat(){
+  const items = load(LS.chat, []);
+  const chat = document.getElementById('chat');
+  if(!items.length){ chat.innerHTML='<div class="empty">👋 你好，我是研途 GradMate。<br>可以问我：<br>· CSSCI 和北大核心有什么区别？<br>· 小论文和大论文是什么关系？<br>· 我研二了还没发论文来得及吗？<br>· 开题报告怎么写？</div>'; return; }
+  chat.innerHTML = items.map(i=>'<div class="msg '+i.role+'">'+esc(i.text)+'</div>').join('');
+}
+function updateModeBadge(){
+  const b = document.getElementById('modeBadge');
+  if(settings.proxy){ b.textContent = 'AI 模式'; b.className='mode-badge ai'; }
+  else { b.textContent = '演示模式'; b.className='mode-badge'; }
+}
+async function send(){
+  const input = document.getElementById('qInput');
+  const q = input.value.trim();
+  if(!q) return;
+  addMsg('user', q);
+  input.value = '';
+  const typing = document.createElement('div');
+  typing.className='msg bot'; typing.textContent='正在思考…';
+  document.getElementById('chat').appendChild(typing);
+  try{
+    let answer, src;
+    if(settings.proxy){
+      answer = await askAI(q);
+      src = '来源：AI 模式（知识库检索 + 大模型回答）';
+    } else {
+      answer = kbAnswer(q);
+      if(!answer){ answer = '这个问题内置知识库还没有覆盖。\n\n你可以：\n1. 在 ⚙️ 设置里填入 AI 代理地址，切换到真实 AI 回答（更准）；\n2. 或者换个问法，比如"什么是核心期刊"。'; }
+      src = '来源：演示模式（内置知识库，未连接 AI）';
+    }
+    typing.textContent = answer;
+    const s = document.createElement('span'); s.className='src'; s.textContent = src; typing.appendChild(s);
+  }catch(e){
+    typing.textContent = '⚠️ 调用失败：' + e.message + '\n\n请检查 ⚙️ 设置里的代理地址，或先用演示模式。';
+  }
+  document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+  saveChat();
+}
+
+/* ================= 设置 ================= */
+function normalizeProxy(u){
+  u = (u||'').trim().replace(/\/+$/,'');
+  if(u && !/^https?:\/\//i.test(u)) u = 'https://' + u;
+  return u;
+}
+function fillSettings(){
+  document.getElementById('s-proxy').value = settings.proxy||'';
+  document.getElementById('s-model').value = settings.model||'glm-4-flash';
+}
+document.getElementById('saveSettingsBtn').onclick = function(){
+  settings.proxy = normalizeProxy(document.getElementById('s-proxy').value);
+  settings.model = document.getElementById('s-model').value.trim() || 'glm-4-flash';
+  save(LS.settings, settings);
+  updateModeBadge();
+  document.getElementById('settingsMsg').innerHTML = '<div class="ok-text">✅ 已保存，问答页将使用 AI 模式</div>';
+};
+document.getElementById('testProxyBtn').onclick = async function(){
+  const btn = this; btn.disabled = true; btn.textContent = '测试中…';
+  document.getElementById('settingsMsg').innerHTML = '';
+  try{
+    const target = normalizeProxy(settings.proxy || document.getElementById('s-proxy').value);
+    const r = await fetch(target, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({messages:[{role:'user',content:'请只回复：连接成功'}], model:'glm-4-flash'})
+    });
+    const d = await r.json();
+    const ok = d.choices && d.choices[0];
+    document.getElementById('settingsMsg').innerHTML = ok ? '<div class="ok-text">✅ 连接成功！可以开始用 AI 模式了</div>' : '<div class="warn-text">⚠️ 返回内容异常：' + JSON.stringify(d).slice(0,120) + '</div>';
+  }catch(e){
+    document.getElementById('settingsMsg').innerHTML = '<div class="warn-text">❌ 连接失败：' + esc(e.message) + '</div>';
+  }
+  btn.disabled = false; btn.textContent = '测试连接';
+};
+
+/* ================= 事件绑定 ================= */
+document.getElementById('saveProfileBtn').onclick = saveProfile;
+document.getElementById('addTaskBtn').onclick = function(){
+  const v = document.getElementById('newTask').value.trim();
+  if(!v) return;
+  const id = 'c' + Date.now();
+  tasks[id] = {name:v, stage:'自定义', done:false};
+  save(LS.tasks, tasks);
+  document.getElementById('newTask').value='';
+  renderTasks();
+};
+document.getElementById('taskList').addEventListener('change', e=>{
+  const id = e.target.dataset.check; if(!id) return;
+  if(tasks[id]){ tasks[id].done = e.target.checked; save(LS.tasks, tasks); }
+  renderTasks();
+});
+document.getElementById('taskList').addEventListener('click', e=>{
+  const btn = e.target.closest('[data-del]'); if(!btn) return;
+  const id = btn.dataset.del;
+  if(tasks[id]){ delete tasks[id]; save(LS.tasks, tasks); }
+  renderTasks();
+});
+document.getElementById('genReportBtn').onclick = genReport;
+document.getElementById('copyReportBtn').onclick = copyReport;
+document.getElementById('sendBtn').onclick = send;
+document.getElementById('qInput').addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
+document.querySelectorAll('nav.tabs button').forEach(b=>{
+  b.onclick = function(){
+    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    const tab = b.dataset.tab;
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    document.getElementById('page-' + tab).classList.add('active');
+  };
+});
+document.getElementById('settingsBtn').onclick = ()=>{ fillSettings(); document.getElementById('settingsModal').classList.add('show'); };
+document.getElementById('manualBtn').onclick = ()=>{ document.getElementById('manualModal').classList.add('show'); };
+document.querySelectorAll('[data-close]').forEach(b=>{
+  b.onclick = ()=>{ document.getElementById(b.dataset.close).classList.remove('show'); };
+});
+document.querySelectorAll('.modal-mask').forEach(m=>{
+  m.addEventListener('click', e=>{ if(e.target===m) m.classList.remove('show'); });
+});
+
+/* ================= 初始化 ================= */
+fillProfileForm();
+fillSettings();
+updateModeBadge();
+renderMilestone();
+renderTasks();
+loadChat();
+</script>
+</body>
+</html>
