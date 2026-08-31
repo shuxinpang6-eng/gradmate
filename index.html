@@ -39,13 +39,6 @@
   .btn.ghost{background:transparent; color:var(--primary-dark); border:1px solid var(--border);}
   .btn.block{width:100%;}
   .btn:disabled{opacity:.5; cursor:not-allowed;}
-  /* 底部 Tab */
-  nav.tabs{position:fixed; bottom:0; left:0; right:0; background:var(--card); border-top:1px solid var(--border);
-       display:flex; padding:6px 0 calc(6px + env(safe-area-inset-bottom)); z-index:20;}
-  nav.tabs button{flex:1; background:none; border:none; padding:8px 0; font-size:13px; color:var(--muted);
-       cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:2px;}
-  nav.tabs button .em{font-size:18px;}
-  nav.tabs button.active{color:var(--primary-dark); font-weight:700;}
   /* 里程碑 */
   .milestone{display:flex; flex-wrap:wrap; gap:6px; margin-top:6px;}
   .m-node{flex:1 1 90px; border:1px solid var(--border); border-radius:10px; padding:8px 6px; text-align:center;
@@ -71,7 +64,7 @@
   .risk b{display:block; font-size:13px; margin-bottom:2px;}
   .risk span{font-size:12px; color:var(--text); line-height:1.6;}
   /* 问答 */
-  #chat{height:calc(100vh - 300px); min-height:320px; overflow-y:auto; padding:6px 2px;}
+  #chat{height:calc(100vh - 210px); min-height:380px; overflow-y:auto; padding:6px 2px;}
   .msg{max-width:88%; margin:8px 0; padding:10px 13px; border-radius:14px; font-size:14px; line-height:1.7; white-space:pre-wrap; word-break:break-word;}
   .msg.user{margin-left:auto; background:var(--primary); color:#fff; border-bottom-right-radius:4px;}
   .msg.bot{margin-right:auto; background:#fff; border:1px solid var(--border); border-bottom-left-radius:4px;}
@@ -112,76 +105,14 @@
 
 <header>
   <div class="logo">🎓 研途 GradMate<small>研究生学术助手</small></div>
+  <button class="icon-btn" id="profileBtn">👤 身份</button>
   <button class="icon-btn" id="manualBtn">📖 使用手册</button>
   <button class="icon-btn" id="settingsBtn">⚙️ 设置</button>
 </header>
 
 <main>
-  <!-- ============ 页面1：毕业进度 ============ -->
-  <section class="page active" id="page-progress">
-    <div class="card">
-      <h3>🧑‍🎓 我的身份 <span class="tag">只填 3 个，其他自动算</span></h3>
-      <div class="row">
-        <div><label>专业/方向</label><input id="p-major" placeholder="如：生态学"></div>
-        <div><label>入学年月</label><input type="month" id="p-start"></div>
-      </div>
-      <div class="row">
-        <div><label>学制</label>
-          <select id="p-duration"><option value="3">学硕 3 年</option><option value="2">专硕 2 年</option><option value="2.5">专硕 2.5 年</option></select>
-        </div>
-        <div><label>毕业目标</label><input id="p-goal" placeholder="如：1 篇 SCI 二区"></div>
-      </div>
-      <div class="muted" id="autoInfo" style="margin-top:8px;"></div>
-      <div style="margin-top:10px;"><button class="btn block" id="saveProfileBtn">💾 保存</button></div>
-    </div>
-
-    <div class="card" id="actionCard" style="display:none">
-      <h3>🎯 我现在该做什么 <span class="tag">核心面板</span></h3>
-      <div id="stageFocus"></div>
-      <div style="margin-top:12px;"><button class="btn block" id="planBtn">🤖 生成我的下一步计划</button></div>
-      <div id="planOut" class="kb-preview" style="display:none; margin-top:10px; white-space:pre-wrap; color:var(--text);"></div>
-    </div>
-
-    <div class="card">
-      <h3>🗓️ 毕业里程碑</h3>
-      <div class="bar"><div id="progressBar" style="width:0%"></div></div>
-      <div class="muted" id="progressPct">尚未生成进度（先保存身份）</div>
-      <div class="milestone" id="milestoneBox"></div>
-      <div id="countdownBox" class="stat"></div>
-    </div>
-
-    <div class="card" id="riskCard" style="display:none">
-      <h3>⚠️ 风险提醒</h3>
-      <div id="riskList"></div>
-    </div>
-
-    <div class="card">
-      <h3>✅ 任务清单 <span class="tag">勾选完成，自动保存</span></h3>
-      <div id="taskList"></div>
-      <div class="row" style="margin-top:10px;">
-        <input id="newTask" placeholder="添加自定义任务，如：找导师确认选题">
-        <button class="btn ghost" id="addTaskBtn" style="flex:0 0 70px;">添加</button>
-      </div>
-    </div>
-
-    <div class="card">
-      <h3>🎯 毕业要求核对 <span class="tag">还差什么一目了然</span></h3>
-      <div id="checkList"></div>
-    </div>
-
-    <div class="card">
-      <h3>📝 周报 <span class="tag">随手写几句 → AI 整理成正式周报</span></h3>
-      <textarea id="r1" rows="3" placeholder="这周都干了啥？比如：读了 3 篇文献、整理了数据、卡在指标选择…"></textarea>
-      <div style="margin-top:10px; display:flex; gap:8px;">
-        <button class="btn" id="genReportBtn" style="flex:1">🤖 AI 生成周报</button>
-        <button class="btn ghost" id="copyReportBtn" style="flex:0 0 80px;">复制</button>
-      </div>
-      <div id="reportOut" class="kb-preview" style="display:none; margin-top:10px; white-space:pre-wrap; color:var(--text);"></div>
-    </div>
-  </section>
-
   <!-- ============ 页面2：学术问答 ============ -->
-  <section class="page" id="page-qa">
+  <section id="page-qa">
     <div class="card" style="padding:10px 14px;">
       <div style="display:flex; align-items:center; gap:8px;">
         <b style="font-size:14px; color:var(--primary-dark);">📚 学术常识问答</b>
@@ -197,10 +128,24 @@
   </section>
 </main>
 
-<nav class="tabs">
-  <button class="active" data-tab="progress"><span class="em">🎯</span>毕业进度</button>
-  <button data-tab="qa"><span class="em">📚</span>学术问答</button>
-</nav>
+<!-- 首次使用：我的身份弹窗 -->
+<div class="modal-mask" id="profileModal">
+  <div class="modal">
+    <h3>👋 欢迎使用研途 GradMate</h3>
+    <div class="muted" style="margin-bottom:10px;">先告诉我一点点你的情况，AI 就会一直记住，给你更准的建议。只需 1 分钟。</div>
+    <label>专业 / 方向</label>
+    <input id="p-major" placeholder="如：生态学">
+    <label>入学年月</label>
+    <input type="month" id="p-start">
+    <label>学制</label>
+    <select id="p-duration"><option value="3">学硕 3 年</option><option value="2">专硕 2 年</option><option value="2.5">专硕 2.5 年</option></select>
+    <label>毕业目标（选填）</label>
+    <input id="p-goal" placeholder="如：1 篇 SCI 二区">
+    <div class="muted" id="autoInfo" style="margin-top:8px;"></div>
+    <div style="margin-top:14px;"><button class="btn block" id="saveProfileBtn">✅ 保存，开始使用</button></div>
+    <button class="btn ghost block" id="skipProfileBtn" style="margin-top:8px;">先跳过</button>
+  </div>
+</div>
 
 <!-- 设置弹窗 -->
 <div class="modal-mask" id="settingsModal">
@@ -226,17 +171,15 @@
     <button class="close" data-close="manualModal">✕</button>
     <h3>📖 使用手册</h3>
     <div class="small" style="line-height:2; color:var(--text);">
-      <b>🎯 毕业进度页</b><br>
-      1. 填「我的身份」（专业/入学/学制/目标）→ 保存，其余自动算<br>
-      2. 看「我现在该做什么」：当前阶段 + 该做的事 + 一键 AI 生成未来 30 天计划<br>
-      3. 里程碑 / 风险提醒 / 毕业要求核对 / 任务清单<br>
-      4. 周报：随手写几句 → 「AI 生成周报」整理成正式版发给导师<br><br>
-      <b>📚 学术问答页</b><br>
+      <b>👤 我的身份</b><br>
+      1. 第一次打开会弹出身份填写，保存后 AI 会一直记住你<br>
+      2. 想修改：点右上角「👤 身份」<br><br>
+      <b>📚 学术问答</b><br>
       1. 直接问学术常识（期刊/论文/毕业流程都行），可以连续追问，AI 记得上文<br>
       2. 每条消息右下角「⋯」可复制 / 编辑 / 删除<br>
-      3. 「演示模式」= 内置知识库；⚙️ 填入代理地址后 = 真实 AI（先保存身份更贴合）<br><br>
+      3. 「演示模式」= 内置知识库；⚙️ 填入代理地址后 = 真实 AI（结合你的身份回答）<br><br>
       <b>🔒 隐私</b><br>
-      你的身份、任务、周报都存在自己浏览器里（localStorage），不上传任何服务器。<br><br>
+      你的身份和对话都存在自己浏览器里（localStorage），不上传任何服务器。<br><br>
       <b>常见问题</b><br>
       · 想清空数据：浏览器设置里清除该网站数据<br>
       · 演示模式回答比较简单：接上 AI 后质量大幅提升
@@ -250,113 +193,35 @@ const LS = {
   profile:'gm_profile', tasks:'gm_tasks', settings:'gm_settings', chat:'gm_chat'
 };
 let profile = load(LS.profile, {});
-let tasks = load(LS.tasks, {});
 let settings = load(LS.settings, {proxy:'', model:'glm-4-flash'});
 
 function load(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)); return v==null? d : v; }catch(e){ return d; } }
 function save(k, v){ localStorage.setItem(k, JSON.stringify(v)); }
 
-/* ================= 里程碑 ================= */
-const STAGES = [
-  {name:'课程学习', start:0, end:15},
-  {name:'确定方向', start:12, end:28},
-  {name:'文献综述', start:25, end:45},
-  {name:'开题', start:40, end:60},
-  {name:'中期检查', start:55, end:75},
-  {name:'预答辩', start:75, end:88},
-  {name:'盲审/外审', start:82, end:94},
-  {name:'答辩+学位', start:92, end:100}
-];
-const DEFAULT_TASKS = [
-  {id:'t1', stage:'课程学习', name:'确定导师并沟通研究兴趣'},
-  {id:'t2', stage:'课程学习', name:'读完培养方案，抄下毕业要求'},
-  {id:'t3', stage:'确定方向', name:'和导师确定研究方向'},
-  {id:'t4', stage:'文献综述', name:'完成领域文献综述初稿'},
-  {id:'t5', stage:'开题', name:'确定论文选题'},
-  {id:'t6', stage:'开题', name:'完成开题报告并参加开题答辩'},
-  {id:'t7', stage:'中期检查', name:'完成中期报告并汇报'},
-  {id:'t8', stage:'预答辩', name:'完成论文初稿并参加预答辩'},
-  {id:'t9', stage:'盲审/外审', name:'修改论文，送盲审'},
-  {id:'t10', stage:'答辩+学位', name:'正式答辩并提交最终版'}
-];
-
+/* ================= 工具函数 ================= */
 function monthToDate(v){ return v ? new Date(v + '-01') : null; }
-function getPct(){
-  if(!profile.start || !profile.grad) return null;
-  const s = monthToDate(profile.start), g = monthToDate(profile.grad);
-  const total = g - s, now = Date.now() - s;
-  if(total <= 0) return 100;
-  return Math.max(0, Math.min(100, now/total*100));
-}
-function renderMilestone(){
-  const pct = getPct();
-  const box = document.getElementById('milestoneBox');
-  if(pct==null){ box.innerHTML=''; document.getElementById('progressPct').textContent='尚未生成进度（先保存身份）'; document.getElementById('progressBar').style.width='0%'; document.getElementById('countdownBox').innerHTML=''; return; }
-  document.getElementById('progressBar').style.width = pct.toFixed(1)+'%';
-  document.getElementById('progressPct').textContent = '总体进度 ' + pct.toFixed(0) + '% · 已用时 ' + Math.floor((Date.now()-monthToDate(profile.start))/86400000) + ' 天';
-  box.innerHTML = STAGES.map((s,i)=>{
-    const cls = s.end < pct ? 'done' : (s.start <= pct ? 'current' : '');
-    return '<div class="m-node '+cls+'"><span class="dot"></span>'+s.name+'</div>';
-  }).join('');
-  // 倒计时
-  const g = monthToDate(profile.grad), days = Math.ceil((g - Date.now())/86400000);
-  let cd = '';
-  if(days > 0){
-    const months = (days/30.44).toFixed(1);
-    cd = '<div class="stat"><div><b>'+days+'</b><span>距毕业（天）</span></div>'+
-         '<div><b>'+months+'</b><span>剩余（月）</span></div>'+
-         '<div><b>'+ (STAGES.filter(s=>s.end<pct).length) +'/'+STAGES.length +'</b><span>已完成节点</span></div></div>';
-  } else {
-    cd = '<div class="stat"><div><b>⚠️</b><span>已到预计毕业时间</span></div></div>';
-  }
-  document.getElementById('countdownBox').innerHTML = cd;
-  renderRisk(days);
-}
-function renderRisk(days){
-  const card = document.getElementById('riskCard');
-  const pct = getPct();
-  if(pct==null){ card.style.display='none'; return; }
-  const curIdx = STAGES.findIndex(s=>s.start<=pct && pct<=s.end);
-  const cur = curIdx<0 ? 0 : curIdx;
-  const risks = [];
-  const months = days/30.44;
-  if(days <= 0) risks.push({d:true, t:'已到预计毕业时间', dsc:'请立即核对：学分是否修满、论文是否送审、学位申请材料是否提交。'});
-  else if(months < 6 && cur < 6) risks.push({d:true, t:'距毕业不足 6 个月，还没到预答辩/盲审阶段', dsc:'这是高风险信号，立刻和导师确认盲审安排，论文按最终稿标准修改。'});
-  else if(months < 12 && cur < 4) risks.push({d:true, t:'距毕业不足 1 年，还没到开题/中期', dsc:'建议倒排计划：先把开题和中期节点写进日历，每周推进。'});
-  else if(months < 21 && cur < 3) risks.push({d:false, t:'距毕业不足 2 年，方向要尽快定', dsc:'开题是最容易拖出延毕风险的节点，尽早和导师敲定选题。'});
-  if(cur >= 1 && cur < 3) risks.push({d:false, t:'你正处于「'+STAGES[cur].name+'」阶段', dsc:'当前重点是确定选题 + 文献综述，小论文建议同步开始积累（投稿周期 3-12 个月）。'});
-  if(risks.length===0) risks.push({d:false, t:'当前进度正常', dsc:'按计划推进即可，记得每周写周报记录进展。'});
-  card.style.display='block';
-  document.getElementById('riskList').innerHTML = risks.map(r=>
-    '<div class="risk '+(r.d?'danger':'ok')+'"><b>'+(r.d?'🔴 ':'🟢 ')+r.t+'</b><span>'+r.dsc+'</span></div>'
-  ).join('');
-}
-
-/* ================= 任务 ================= */
-function renderTasks(){
-  const box = document.getElementById('taskList');
-  const list = DEFAULT_TASKS.map(d=>({...d, done:!!tasks[d.id]}));
-  Object.keys(tasks).forEach(id=>{ if(!list.find(t=>t.id===id) && tasks[id] && tasks[id].name){
-    list.push({id, stage: tasks[id].stage||'自定义', name: tasks[id].name, done: tasks[id].done});
-  }});
-  if(list.length===0){ box.innerHTML='<div class="empty">暂无任务，先保存身份生成默认任务</div>'; return; }
-  box.innerHTML = list.map(t=>{
-    const done = t.done ? 'done' : '';
-    return '<div class="task '+done+'" data-id="'+t.id+'">'+
-      '<input type="checkbox" '+(t.done?'checked':'')+' data-check="'+t.id+'">'+
-      '<span class="t-name">'+esc(t.name)+'</span>'+
-      '<span class="t-stage">'+esc(t.stage)+'</span>'+
-      '<button class="t-del" data-del="'+t.id+'">✕</button></div>';
-  }).join('');
-}
 function esc(s){ return String(s).replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
 /* ================= 身份 ================= */
 function fillProfileForm(){
   document.getElementById('p-major').value = profile.major||'';
-  document.getElementById('p-duration').value = profile.duration||'3';
   document.getElementById('p-start').value = profile.start||'';
+  document.getElementById('p-duration').value = profile.duration||'3';
   document.getElementById('p-goal').value = profile.goal||'';
+  updateAutoInfo();
+}
+function updateAutoInfo(){
+  const info = document.getElementById('autoInfo');
+  if(!info) return;
+  const start = document.getElementById('p-start').value;
+  const dur = document.getElementById('p-duration').value;
+  if(start && dur){
+    const d = monthToDate(start);
+    d.setMonth(d.getMonth() + Math.round(parseFloat(dur)*12));
+    info.textContent = '自动计算：预计毕业 ' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0');
+  } else {
+    info.textContent = '';
+  }
 }
 function saveProfile(){
   profile = {
@@ -365,7 +230,6 @@ function saveProfile(){
     start: document.getElementById('p-start').value,
     goal: document.getElementById('p-goal').value.trim()
   };
-  // 毕业时间按学制自动推
   if(profile.start && profile.duration){
     const d = monthToDate(profile.start);
     d.setMonth(d.getMonth() + Math.round(parseFloat(profile.duration)*12));
@@ -373,13 +237,8 @@ function saveProfile(){
   }
   save(LS.profile, profile);
   fillProfileForm();
-  // 首次生成默认任务
-  if(Object.keys(tasks).length===0){
-    DEFAULT_TASKS.forEach(t=>{ tasks[t.id] = {name:t.name, stage:t.stage, done:false}; });
-    save(LS.tasks, tasks);
-  }
-  renderMilestone(); renderTasks(); renderChecks(); renderStageFocus();
-  showToast('✅ 身份已保存');
+  document.getElementById('profileModal').classList.remove('show');
+  showToast('✅ 身份已保存，AI 会记住你');
 }
 function showToast(msg){
   const el = document.createElement('div');
@@ -388,112 +247,6 @@ function showToast(msg){
   document.body.appendChild(el);
   setTimeout(()=>el.remove(), 1800);
 }
-
-/* ================= 周报（随手写 → AI 整理） ================= */
-async function genReport(){
-  const txt = document.getElementById('r1').value.trim();
-  if(!txt){ showToast('先写几句这周干了啥'); return; }
-  const out = document.getElementById('reportOut');
-  out.style.display = 'block';
-  if(settings.proxy){
-    const btn = document.getElementById('genReportBtn'); btn.disabled = true; btn.textContent = '生成中…';
-    out.textContent = '🤖 AI 正在整理周报…';
-    const sys = '你是「研途 GradMate」的周报助手。用户随手记了本周内容，请整理成正式、专业、可直接发给导师的周报，结构包含【本周进展】【问题与求助】【下周计划】；只基于用户写的内容，不要虚构；下周计划可合理补充。只输出周报正文。';
-    try{
-      const ans = await callAI([{role:'system', content: sys}, {role:'user', content: '本周随手记：' + txt}]);
-      out.textContent = ans;
-      document.getElementById('copyReportBtn').dataset.text = ans;
-      showToast('✅ AI 周报已生成');
-    }catch(e){ out.textContent = '生成失败：' + e.message; }
-    btn.disabled = false; btn.textContent = '🤖 AI 生成周报';
-  } else {
-    const now = new Date();
-    const dateStr = (now.getMonth()+1) + '月' + now.getDate() + '日';
-    const simple = '【周报 · ' + dateStr + '】\n\n【本周进展】\n' + txt + '\n\n【问题与求助】\n（未填写）\n\n【下周计划】\n（未填写）';
-    out.textContent = simple;
-    document.getElementById('copyReportBtn').dataset.text = simple;
-    showToast('📝 已生成（配置 AI 后会自动润色成正式周报）');
-  }
-}
-async function copyReport(){
-  const el = document.getElementById('reportOut');
-  if(el.style.display==='none'){ showToast('先生成周报再复制'); return; }
-  try{ await navigator.clipboard.writeText(el.textContent); showToast('📋 已复制，可粘贴发给导师'); }
-  catch(e){ showToast('复制失败，请手动长按选择复制'); }
-}
-
-/* ================= 毕业要求核对清单 ================= */
-const CHECKS = [
-  {id:'c1', name:'课程学分修满'},
-  {id:'c2', name:'小论文达到学院要求（级别 + 数量）'},
-  {id:'c3', name:'大论文完成并通过盲审 / 答辩'},
-  {id:'c4', name:'其他学院要求（实习 / 材料等）'}
-];
-let checks = load('gm_checks', {});
-function renderChecks(){
-  const box = document.getElementById('checkList');
-  if(!box) return;
-  const doneN = CHECKS.filter(function(c){ return checks[c.id]; }).length;
-  box.innerHTML = '<div class="muted" style="margin-bottom:6px;">已完成 ' + doneN + ' / ' + CHECKS.length + '</div>' +
-    CHECKS.map(function(c){
-      return '<div class="task ' + (checks[c.id]?'done':'') + '"><input type="checkbox" ' + (checks[c.id]?'checked':'') + ' data-checkc="' + c.id + '"><span class="t-name">' + esc(c.name) + '</span></div>';
-    }).join('');
-}
-document.getElementById('checkList').addEventListener('change', function(e){
-  const id = e.target.dataset.checkc; if(!id) return;
-  checks[id] = e.target.checked;
-  localStorage.setItem('gm_checks', JSON.stringify(checks));
-  renderChecks();
-});
-
-/* ================= 当前阶段该做什么 ================= */
-const STAGE_ACTIONS = [
-  {title:'课程 + 定方向', tips:['修满学分，别拖到研二','和导师确定研究方向','开始读领域经典文献 20+ 篇']},
-  {title:'定方向 + 选题', tips:['把方向缩小到一个具体问题','和导师确认选题可行性','建文献管理库（如 Zotero）']},
-  {title:'文献综述', tips:['完成文献综述初稿','找到研究空白','小论文选题落地']},
-  {title:'开题', tips:['写开题报告（背景/综述/内容/方法/进度）','准备开题答辩 PPT','开题后原则上不改方向']},
-  {title:'中期检查', tips:['完成大论文初稿 50%','准备中期报告','发现问题及时和导师对齐']},
-  {title:'预答辩', tips:['完成论文全稿','按导师意见修改','模拟答辩提问']},
-  {title:'盲审/外审', tips:['论文格式排版，反复校对','盲审送审','按外审意见认真修改']},
-  {title:'答辩 + 学位', tips:['准备答辩 PPT 并演练','答辩通过后提交终稿','提交学位申请材料']}
-];
-function renderStageFocus(){
-  const card = document.getElementById('actionCard');
-  const pct = getPct();
-  if(pct==null){ if(card) card.style.display='none'; return; }
-  card.style.display='block';
-  const curIdx = STAGES.findIndex(s=>s.start<=pct && pct<=s.end);
-  const i = curIdx<0 ? 0 : curIdx;
-  const a = STAGE_ACTIONS[i];
-  const days = Math.ceil((monthToDate(profile.grad)-Date.now())/86400000);
-  let grade = '';
-  if(profile.start){
-    const y = Math.floor((Date.now()-monthToDate(profile.start))/31536000000) + 1;
-    grade = '研' + Math.min(3, Math.max(1, y));
-  }
-  const info = document.getElementById('autoInfo');
-  if(info) info.textContent = '自动计算：当前' + (grade?' '+grade:'') + (days>0?' · 距毕业约 '+days+' 天':'') + (profile.grad?' · 预计毕业 '+profile.grad:'');
-  document.getElementById('stageFocus').innerHTML =
-    '<div class="stage-now">当前阶段：<b>「'+STAGES[i].name+'」</b> — '+a.title+'</div>' +
-    a.tips.map(function(t){ return '<div class="tip">· '+t+'</div>'; }).join('');
-}
-document.getElementById('planBtn').onclick = async function(){
-  if(!profile.start || !profile.grad){ showToast('请先保存身份'); return; }
-  if(!settings.proxy){ showToast('请先在 ⚙️ 设置里配置 AI 代理地址'); return; }
-  const btn = this; btn.disabled = true; btn.textContent = '生成中…';
-  const out = document.getElementById('planOut'); out.style.display='block'; out.textContent='🤖 正在为你定制未来 30 天计划…';
-  const pct = getPct();
-  const curIdx = STAGES.findIndex(s=>s.start<=pct && pct<=s.end);
-  const stageName = STAGES[curIdx<0?0:curIdx].name;
-  const days = Math.ceil((monthToDate(profile.grad)-Date.now())/86400000);
-  const sys = '你是「研途 GradMate」的进度规划助手。请结合用户身份和当前阶段，输出一份未来 30 天的具体行动计划：分成 4 周，每周给出目标、每天 2-3 个可执行动作、需要找导师确认的事项、风险提示。语气像靠谱的师兄/师姐。只输出计划正文。';
-  const q = '我的情况：专业='+(profile.major||'未填')+'，当前阶段=「'+stageName+'」，距毕业约 '+days+' 天，毕业目标='+(profile.goal||'未填')+'。请给我未来 30 天的下一步计划。';
-  try{
-    const ans = await callAI([{role:'system', content: sys}, {role:'user', content: q}]);
-    out.textContent = ans;
-  }catch(e){ out.textContent = '生成失败：' + e.message; }
-  btn.disabled = false; btn.textContent = '🤖 生成我的下一步计划';
-};
 
 /* ================= 问答：内置知识库（演示模式） ================= */
 const MINI_KB = [
@@ -571,19 +324,31 @@ function retrieve(q, chunks){
 }
 function buildSystemPrompt(){
   const p = profile;
-  let identity = '用户身份信息：' +
-    (p.major?'专业：'+p.major+'；':'') + (p.school?'学校：'+p.school+'；':'') +
-    (p.grade?'年级：'+p.grade+'；':'') + (p.start?'入学：'+p.start+'；':'') +
-    (p.grad?'预计毕业：'+p.grad+'；':'') + (p.goal?'毕业目标：'+p.goal+'；':'');
-  if(!p.major && !p.grade) identity += '（用户尚未填写身份，如涉及专业相关问题请先礼貌询问关键信息再回答）';
+  let grade = '';
+  if(p.start){
+    const y = Math.floor((Date.now()-monthToDate(p.start))/31536000000)+1;
+    grade = '研'+Math.min(3, Math.max(1, y));
+  }
+  let daysLeft = '';
+  if(p.grad){
+    const d = Math.ceil((monthToDate(p.grad)-Date.now())/86400000);
+    if(d>0) daysLeft = '距毕业约'+d+'天；';
+  }
+  let identity = '用户身份信息：';
+  identity += (p.major ? '专业='+p.major+'；' : '') + (grade ? '当前年级='+grade+'；' : '') +
+    (p.start ? '入学='+p.start+'；' : '') + (p.grad ? '预计毕业='+p.grad+'；' : '') +
+    (daysLeft || '') + (p.goal ? '毕业目标='+p.goal+'；' : '');
+  if(!p.major && !p.start) identity += '（用户尚未填写身份，涉及专业/进度问题时请先礼貌询问关键信息再回答）';
   return '你是「研途 GradMate」，一个专为研究生打造的学术成长助手。\n'+
+    '【用户身份信息】（回答涉及用户自身情况时，必须结合以下身份，禁止对任何人都给一样的通用答案）\n'+identity+'\n'+
     '任务：用大白话回答研究生的学术常识问题（期刊体系、论文类型、毕业流程），并结合用户身份给针对性建议。\n'+
     '规则：\n'+
-    '1. 先给结论再解释，能用列表用列表；专业名词第一次出现带一句大白话解释；一般回答控制在 200 字内，用户要求"详细介绍/讲讲/分析"时适当展开到 400 字。\n'+
+    '1. 先给结论再解释，能用列表用列表；专业名词第一次出现带一句大白话解释；一般回答控制在 200 字内，用户要求详细介绍时可展开到 400 字。\n'+
     '2. 回答优先依据「参考资料」。若参考资料覆盖不到，用你的通用知识尽量给出具体、真实的信息：例如用户问某本期刊的详细介绍，要直接介绍它的出版方、创刊时间、收录数据库、大致分区、影响因子水平、投稿特点等，不要只给"期刊介绍包括哪些方面"这种模板框架；拿不准的具体数字要标注"以官网/最新分区表为准"；实在没有依据才说"我没有可靠依据"。\n'+
-    '3. 涉及学校具体要求（毕业几篇、认不认 EI 会议等）时，提醒"以你们学校研究生院/学院最新文件为准"。\n'+
-    '4. 问题与学术/毕业无关时，礼貌说明你只回答研究生学术与毕业相关问题。\n'+
-    identity+'\n';
+    '3. 【身份强约束】当问题涉及用户自身情况（如"我需不需要发 SCI""我来得及吗""我现在该做什么"），必须：先点明用户情况（如"你是生态学专业的研二学生，距毕业约 275 天"），再给针对性的具体建议；禁止泛泛而谈。\n'+
+    '4. 【兜底标注】凡是用通用知识回答、不是来自知识库资料的内容，回答里必须明确标注"以下为通用知识，建议以学校/学院最新文件为准"。\n'+
+    '5. 涉及学校具体要求（毕业几篇、认不认 EI 会议等）时，提醒"以你们学校研究生院/学院最新文件为准"。\n'+
+    '6. 问题与学术/毕业无关时，礼貌拒绝并引导回学术/毕业话题。\n';
 }
 async function callAI(messages){
   const r = await fetch(settings.proxy, {
@@ -781,39 +546,12 @@ document.getElementById('testProxyBtn').onclick = async function(){
 
 /* ================= 事件绑定 ================= */
 document.getElementById('saveProfileBtn').onclick = saveProfile;
-document.getElementById('addTaskBtn').onclick = function(){
-  const v = document.getElementById('newTask').value.trim();
-  if(!v) return;
-  const id = 'c' + Date.now();
-  tasks[id] = {name:v, stage:'自定义', done:false};
-  save(LS.tasks, tasks);
-  document.getElementById('newTask').value='';
-  renderTasks();
-};
-document.getElementById('taskList').addEventListener('change', e=>{
-  const id = e.target.dataset.check; if(!id) return;
-  if(tasks[id]){ tasks[id].done = e.target.checked; save(LS.tasks, tasks); }
-  renderTasks();
-});
-document.getElementById('taskList').addEventListener('click', e=>{
-  const btn = e.target.closest('[data-del]'); if(!btn) return;
-  const id = btn.dataset.del;
-  if(tasks[id]){ delete tasks[id]; save(LS.tasks, tasks); }
-  renderTasks();
-});
-document.getElementById('genReportBtn').onclick = genReport;
-document.getElementById('copyReportBtn').onclick = copyReport;
-document.getElementById('sendBtn').onclick = send;
+document.getElementById('skipProfileBtn').onclick = function(){ document.getElementById('profileModal').classList.remove('show'); };
+document.getElementById('profileBtn').onclick = function(){ fillProfileForm(); document.getElementById('profileModal').classList.add('show'); };
+document.getElementById('p-start').addEventListener('change', updateAutoInfo);
+document.getElementById('p-duration').addEventListener('change', updateAutoInfo);
+document.getElementById('sendBtn').onclick = send;document.getElementById('sendBtn').onclick = send;
 document.getElementById('qInput').addEventListener('keydown', e=>{ if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); send(); } });
-document.querySelectorAll('nav.tabs button').forEach(b=>{
-  b.onclick = function(){
-    document.querySelectorAll('nav.tabs button').forEach(x=>x.classList.remove('active'));
-    b.classList.add('active');
-    const tab = b.dataset.tab;
-    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-    document.getElementById('page-' + tab).classList.add('active');
-  };
-});
 document.getElementById('settingsBtn').onclick = ()=>{ fillSettings(); document.getElementById('settingsModal').classList.add('show'); };
 document.getElementById('manualBtn').onclick = ()=>{ document.getElementById('manualModal').classList.add('show'); };
 document.querySelectorAll('[data-close]').forEach(b=>{
@@ -830,10 +568,10 @@ document.addEventListener('click', function(){
 fillProfileForm();
 fillSettings();
 updateModeBadge();
-renderMilestone();
-renderTasks();
-renderChecks();
-renderStageFocus();
+// 首次使用：弹出身份收集
+if(!profile.major && !profile.start){
+  document.getElementById('profileModal').classList.add('show');
+}
 loadChat();
 </script>
 </body>
